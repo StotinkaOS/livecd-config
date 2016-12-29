@@ -1,0 +1,97 @@
+#!/bin/bash
+
+export LANG=C
+
+# Global options
+buildroot="$(pwd)"
+configpath="${buildroot}/kickstarts"
+logfile="${buildroot}/build-$(date +%Y%m%d%H%M).log"
+cache_dir="/var/cache/live"
+product="StotinkaOS"
+release="7"
+upstream_release="3.1611"
+
+usage() {
+  cat << EOF
+Usage: $0 [option]
+
+Create StotinkaOS Live images using livecd-creator
+
+Options:
+  -g, --gnome     Build GNOME LiveCD
+  -c, --cinnamon  Build CINNAMON LiveCD
+  -m, --mate      Build MATE LiveCD
+  -x, --xfce      Build XFCE LiveCD
+EOF
+  exit 1
+}
+
+# Check if root permissions
+if [[ "$EUID" -ne "0" ]]; then
+  printf "%s\n" "This script must be run as root"
+  exit 1;
+fi
+
+# Check for livecd-tools
+which livecd-creator >/dev/null 2>&1
+if [[ "$?" -eq "1" ]]; then
+  printf "%s\n" "The package livecd-tools is not installed!"
+fi
+
+# Check for config path
+if [[ ! -d "$configpath" ]]; then
+  printf "%s\n" "No config path found. Abort..."
+  exit 1
+fi
+
+case "$1" in
+  -g|--gnome)
+    # GNOME ENV
+    kscfg=("${configpath}/sos-${release}-live-gnome.cfg")
+    fslabel=("${product}-${release}.${upstream_release}-LiveGNOME")
+    banner=("Creating ${product}-${release}.${upstream_release} Gnome live image")
+    ;;
+  -c|--cinnamon)
+    # CINNAMON ENV
+    kscfg=("${configpath}/sos-${release}-live-cinnamon.cfg")
+    fslabel=("$CONFIGPATH/${product}-${release}.${upstream_release}-LiveCINNAMON")
+    banner=("Creating ${product}-${release}.${upstream_release} Cinnamon live image")
+    ;;
+  -x|--xfce)
+    # XFCE ENV
+    kscfg=("${configpath}/sos-${release}-live-xfce4.cfg")
+    fslabel=("${product}-${release}.${upstream_release}-LiveXFCE")
+    banner=("Creating ${product}-${release}.${upstream_release} Xfce live image")
+    ;;
+  -m|--mate)
+    # MATE ENV
+    kscfg=("${configpath}/sos-${release}-live-mate.cfg")
+    fslabel=("${product}-${release}.${upstream_release}-LiveMATE")
+    banner=("Creating ${product}-${release}.${upstream_release} Mate live image")
+    ;;
+  *)
+    usage
+    ;;
+esac
+
+# Disable SELinux
+setenforce 0
+
+# Create the ISO
+printf "%s\n" "* ${banner}"
+livecd-creator \
+  --verbose \
+  --config="${kscfg}" \
+  --fslabel="${fslabel}" \
+  --product="${product}" \
+  --cache="${cache_dir}" >> "${logfile}" 2>&1
+ret="$?"
+if [[ "$ret" -ne "0" ]]; then
+  printf "%s\n" "$0 Failed!"
+  printf "%s\n" "View ${logfile} for details"
+else
+  printf "%s\n" "$0 completed successfully"
+fi
+
+# Enable SELinux
+setenforce 1
