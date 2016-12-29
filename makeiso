@@ -86,11 +86,11 @@ livecd-creator \
   --product="${product}" \
   --cache="${cache_dir}" >> "${logfile}" 2>&1
 ret="$?"
-if [[ "$ret" -ne "0" ]]; then
+if [[ "$ret" -eq "0" ]]; then
+  printf "%s\n" "$0 completed successfully"
+else
   printf "%s\n" "$0 Failed!"
   printf "%s\n" "View ${logfile} for details"
-else
-  printf "%s\n" "$0 completed successfully"
 fi
 
 # Enable SELinux
