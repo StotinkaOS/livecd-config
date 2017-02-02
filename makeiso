@@ -54,7 +54,7 @@ case "$1" in
   -c|--cinnamon)
     # CINNAMON ENV
     kscfg=("${configpath}/sos-${release}-live-cinnamon.cfg")
-    fslabel=("$CONFIGPATH/${product}-${release}.${upstream_release}-LiveCINNAMON")
+    fslabel=("${product}-${release}.${upstream_release}-LiveCINNAMON")
     banner=("Creating ${product}-${release}.${upstream_release} Cinnamon live image")
     ;;
   -x|--xfce)
