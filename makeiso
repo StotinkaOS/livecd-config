@@ -9,7 +9,7 @@ logfile="${buildroot}/build-$(date +%Y%m%d%H%M).log"
 cache_dir="/var/cache/live"
 product="StotinkaOS"
 release="7"
-upstream_release="3.1611"
+upstream_release="4.1708"
 
 usage() {
   cat << EOF
